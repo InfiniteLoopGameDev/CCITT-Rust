@@ -1,6 +1,7 @@
 mod bitbuffer;
 mod modecodes;
+mod ccittmodes;
 
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", ccittmodes::get_modes());
 }
