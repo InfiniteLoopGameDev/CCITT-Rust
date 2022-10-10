@@ -24,31 +24,21 @@ impl BitBuffer {
     }
 
     pub fn flush_bits(&mut self, count: u8) {
-        self.buffer = self.buffer << count;
+        self.buffer <<= count;
         self.empty_bits += count;
         self.try_fill_buffer()
     }
 
     pub fn peak_8(&self) -> (u8, u8) {
-        return ((self.buffer >> 24) as u8, 32 - self.empty_bits);
-    }
-
-    pub fn peak_16(&self) -> (u16, u8) {
-        return ((self.buffer >> 16) as u16, 32 - self.empty_bits);
+        ((self.buffer >> 24) as u8, 32 - self.empty_bits)
     }
 
     pub fn peak_32(&self) -> (u32, u8) {
-        return (self.buffer, 32 - self.empty_bits);
+        (self.buffer, 32 - self.empty_bits)
     }
 
     pub fn has_data(&self) -> bool {
-        return !(self.empty_bits == 32 && self.source_pos >= self.source.len());
-    }
-
-    pub fn clear(&mut self) {
-        self.buffer = 0;
-        self.empty_bits = 32;
-        self.source_pos = 0;
+        !(self.empty_bits == 32 && self.source_pos >= self.source.len())
     }
 
     pub fn new(source: Vec<u8>) -> BitBuffer {
@@ -59,6 +49,6 @@ impl BitBuffer {
             source_pos: 0,
         };
         buffer.try_fill_buffer();
-        return buffer;
+        buffer
     }
 }

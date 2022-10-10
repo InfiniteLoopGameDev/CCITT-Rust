@@ -1,3 +1,5 @@
+use crate::modecodes as modes;
+
 #[derive(Clone, Copy)]
 pub struct ModeCode {
     pub bits_used: u8,
@@ -20,28 +22,28 @@ pub const MODE_CODES: [u8; 30] = [
 impl ModeCode {
     pub fn get_vertical_offset(&self) -> i8 {
         match self.r#type {
-            crate::modecodes::VERTICALZERO => return 0,
-            crate::modecodes::VERTICALL1 => return -1,
-            crate::modecodes::VERTICALR1 => return 1,
-            crate::modecodes::VERTICALL2 => return -2,
-            crate::modecodes::VERTICALR2 => return 2,
-            crate::modecodes::VERTICALL3 => return -3,
-            crate::modecodes::VERTICALR3 => return 3,
-            _ => return 0,
+            modes::VERTICALZERO => 0,
+            modes::VERTICALL1 => -1,
+            modes::VERTICALR1 => 1,
+            modes::VERTICALL2 => -2,
+            modes::VERTICALR2 => 2,
+            modes::VERTICALL3 => -3,
+            modes::VERTICALR3 => 3,
+            _ => 0,
         }
     }
 
     pub fn matches(&self, data: u8) -> bool {
-        return data & self.mask == self.value;
+        data & self.mask == self.value
     }
 
     pub fn new() -> ModeCode {
-        return ModeCode {
+        ModeCode {
             bits_used: 0,
             mask: 0,
             value: 0,
             r#type: 0,
-        };
+        }
     }
 }
 
@@ -56,5 +58,5 @@ pub fn get_modes() -> [ModeCode; 10] {
         code.r#type = MODE_CODES[i * 3 + 2] as u8;
     }
 
-    return modes;
+    modes
 }

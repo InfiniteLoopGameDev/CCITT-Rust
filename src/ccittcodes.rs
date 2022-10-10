@@ -10,18 +10,18 @@ pub struct HorizontalCode {
 
 impl HorizontalCode {
     pub fn matches(&self, data: u16) -> bool {
-        return (data & self.mask) == self.value;
+        (data & self.mask) == self.value
     }
 
     pub fn new() -> HorizontalCode {
-        return HorizontalCode {
+        HorizontalCode {
             bits_used: 0,
             mask: 0,
             value: 0,
             color: 0,
             pixels: 0,
             terminating: false,
-        };
+        }
     }
 }
 
@@ -40,30 +40,25 @@ impl HorizontalCodes {
             pixels: 0,
             terminating: true,
         };
-        let lookup: &[HorizontalCode; 195];
-        if white {
-            lookup = &self.white_codes;
-        } else {
-            lookup = &self.black_codes;
-        };
-        for i in 0..lookup.len() {
-            if lookup[i].matches(data) {
-                return lookup[i];
+        let lookup: &[HorizontalCode; 195] = if white { &self.white_codes} else { &self.black_codes };
+        for i in lookup {
+            if i.matches(data) {
+                return *i;
             }
         }
-        return r#match;
+        r#match
     }
 
     pub fn find_match_32(&self, data: u32, white: bool) -> HorizontalCode {
-        return self.find_match((data >> 16) as u16, white);
+        self.find_match((data >> 16) as u16, white)
     }
 
     pub fn new() -> HorizontalCodes {
         let (white_codes, black_codes) = load_codes();
-        return HorizontalCodes {
+        HorizontalCodes {
             white_codes,
             black_codes,
-        };
+        }
     }
 }
 
@@ -183,5 +178,5 @@ pub fn load_codes() -> ([HorizontalCode; 195], [HorizontalCode; 195]) {
 
     // white_codes.sort_by_key(|k| k.bits_used);
     // black_codes.sort_by_key(|k| k.bits_used);
-    return (white_codes, black_codes);
+    (white_codes, black_codes)
 }

@@ -4,19 +4,19 @@ fn reverse_color(current: u8) -> u8 {
     if current == 0 {
         return 255;
     }
-    return 0;
+    0
 }
 
 fn end_of_block(buffer: u32) -> bool {
-    return (buffer & 0xffffff00) == 0x00100100;
+    (buffer & 0xffffff00) == 0x00100100
 }
 
-fn get_previous_line(lines: &Vec<Vec<u8>>, current_line: usize, width: usize) -> Vec<u8> {
+fn get_previous_line(lines: &[Vec<u8>], current_line: usize, width: usize) -> Vec<u8> {
     if current_line == 0 {
         let white_out = vec![255; width];
         return white_out;
     }
-    return lines[current_line - 1].clone();
+    lines[current_line - 1].clone()
 }
 
 fn find_b_values(ref_line: Vec<u8>, a0_pos: usize, a0_color: u8, justb1: bool) -> (usize, usize) {
@@ -28,22 +28,12 @@ fn find_b_values(ref_line: Vec<u8>, a0_pos: usize, a0_color: u8, justb1: bool) -
     let (mut b1, mut b2) = (0, 0);
 
     for i in start_pos..ref_line.len() {
-        let mut cur_color: u8;
-        let mut last_color: u8;
+        let cur_color: u8 = if i == 0 {ref_line[0]} else { ref_line[i] };
+        let last_color: u8 = if i == 0 {255} else { ref_line[i - 1] };
 
-        if i == 0 {
-            cur_color = ref_line[0];
-            last_color = 255;
-        } else {
-            cur_color = ref_line[i];
-            last_color = ref_line[i - 1];
-        }
-
-        if b1 != 0 {
-            if cur_color == a0_color && last_color == other {
-                b2 = i;
-                return (b1, b2);
-            }
+        if b1 != 0 && cur_color == a0_color && last_color == other {
+            b2 = i;
+            return (b1, b2);
         }
 
         if cur_color == other && last_color == a0_color {
@@ -59,11 +49,11 @@ fn find_b_values(ref_line: Vec<u8>, a0_pos: usize, a0_color: u8, justb1: bool) -
         b2 = ref_line.len()
     }
 
-    return (b1, b2);
+    (b1, b2)
 }
 
 pub struct Decoder {
-    reverse_color: bool,
+    pub reverse_color: bool,
     width: usize,
     buffer: crate::bitbuffer::BitBuffer,
     mode_codes: [crate::ccittmodes::ModeCode; 10],
@@ -72,24 +62,24 @@ pub struct Decoder {
 
 impl Decoder {
     pub fn new(width: usize, bytes: Vec<u8>) -> Decoder {
-        return Decoder {
+        Decoder {
             reverse_color: false,
             width,
             horizontal_codes: crate::ccittcodes::HorizontalCodes::new(),
             mode_codes: crate::ccittmodes::get_modes(),
             buffer: crate::bitbuffer::BitBuffer::new(bytes),
-        };
+        }
     }
 
     fn get_mode(&self) -> crate::ccittmodes::ModeCode {
         let r#match = crate::ccittmodes::ModeCode::new();
         let (b8, _) = self.buffer.peak_8();
-        for i in 0..self.mode_codes.len() {
-            if self.mode_codes[i].matches(b8) {
-                return self.mode_codes[i].clone();
+        for i in self.mode_codes {
+            if i.matches(b8) {
+                return i;
             }
         }
-        return r#match;
+        r#match
     }
 
     pub fn decode(&mut self) -> Vec<Vec<u8>> {
@@ -128,10 +118,11 @@ impl Decoder {
                         a0_color,
                         false,
                     );
-                    for _p in line_pos..b2 {
-                        line[line_pos] = a0_color;
-                        line_pos += 1;
+
+                    for p in 0..(b2-line_pos) {
+                        line[line_pos + p] = a0_color;
                     }
+                    line_pos += b2-line_pos;
                 }
                 modes::HORIZONTAL => {
                     let mut is_white = a0_color == 0xff;
@@ -202,6 +193,6 @@ impl Decoder {
             }
         }
 
-        return lines;
+        lines
     }
 }
